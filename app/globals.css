@@ -1,0 +1,421 @@
+:root {
+  color-scheme: light;
+  --ink: #17211d;
+  --muted: #61706a;
+  --line: #d9e1dc;
+  --panel: #ffffff;
+  --soft: #f4f7f5;
+  --mint: #d8f0df;
+  --green: #0c6b4f;
+  --green-dark: #084b39;
+  --coral: #d7573f;
+  --amber: #f3b545;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--soft);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+main {
+  min-height: 100vh;
+}
+
+.topbar {
+  align-items: center;
+  background: linear-gradient(135deg, #f8fbf7 0%, #dff1e5 58%, #f8dfd8 100%);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  min-height: 210px;
+  padding: 42px clamp(20px, 6vw, 72px);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+h3 {
+  font-size: 1.1rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+.eyebrow {
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.modeSwitch {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+}
+
+.modeSwitch button,
+.statusButtons button,
+.ratingRow button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.modeSwitch button.active,
+.statusButtons button.active,
+.ratingRow button.active {
+  background: var(--green);
+  color: white;
+}
+
+.notice,
+.customerLayout,
+.waiterLayout {
+  margin: 0 auto;
+  max-width: 1240px;
+  padding: 28px clamp(16px, 4vw, 40px);
+}
+
+.notice {
+  background: #fff6d7;
+  border: 1px solid #f1d88f;
+  border-radius: 8px;
+  color: #5d4510;
+  margin-top: 20px;
+  padding: 14px 16px;
+}
+
+.customerLayout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.menuPane,
+.sidePanel,
+.statusPanel,
+.waiterLayout,
+.orderCard {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.menuPane,
+.sidePanel,
+.waiterLayout,
+.statusPanel {
+  padding: 22px;
+}
+
+.sidePanel {
+  align-self: start;
+  position: sticky;
+  top: 18px;
+}
+
+.sectionHeader,
+.orderTop {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.ghostButton,
+.primaryButton {
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.ghostButton {
+  background: white;
+  color: var(--green);
+}
+
+.primaryButton {
+  background: var(--green);
+  color: white;
+  width: 100%;
+}
+
+.ghostButton.full {
+  width: 100%;
+}
+
+.menuGroup {
+  margin-top: 28px;
+}
+
+.menuGroup h3 {
+  margin-bottom: 12px;
+}
+
+.menuGrid,
+.ordersGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.menuItem {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  min-height: 104px;
+  padding: 16px;
+}
+
+.menuItem p,
+.empty,
+.finePrint,
+.staffLine {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.stepper {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 36px 34px 36px;
+  overflow: hidden;
+}
+
+.stepper button {
+  background: var(--soft);
+  border: 0;
+  height: 36px;
+}
+
+.stepper span {
+  text-align: center;
+}
+
+.lineItems {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.lineItems.compact {
+  margin: 14px 0;
+}
+
+.lineItem,
+.totals {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.totals {
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+  padding-top: 16px;
+}
+
+.totals.single {
+  margin-bottom: 0;
+}
+
+.statusPanel {
+  grid-column: 1 / -1;
+}
+
+.progress {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 24px 0;
+}
+
+.progress span {
+  background: var(--soft);
+  border-radius: 6px;
+  color: var(--muted);
+  min-height: 38px;
+  padding: 10px;
+  text-align: center;
+}
+
+.progress span.done {
+  background: var(--mint);
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.statusColumns {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+textarea,
+input,
+select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 42px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.ratingRow {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  margin-top: 16px;
+}
+
+.ratingRow button {
+  border: 1px solid var(--line);
+  padding: 0;
+}
+
+.finePrint {
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.waiterLayout {
+  margin-top: 28px;
+}
+
+.ordersGrid {
+  margin-top: 22px;
+}
+
+.orderCard {
+  padding: 18px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.chips span {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  padding: 6px 10px;
+}
+
+.assignmentGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.assignmentGrid label {
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.statusButtons {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 16px;
+}
+
+.statusButtons button {
+  border: 1px solid var(--line);
+  min-height: 38px;
+  padding: 0 8px;
+}
+
+@media (max-width: 940px) {
+  .topbar,
+  .sectionHeader,
+  .orderTop {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .customerLayout,
+  .statusColumns,
+  .ordersGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .menuGrid,
+  .progress,
+  .statusButtons {
+    grid-template-columns: 1fr;
+  }
+
+  .menuItem {
+    grid-template-columns: 1fr;
+  }
+}
