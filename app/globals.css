@@ -4,12 +4,14 @@
   --muted: #61706a;
   --line: #d9e1dc;
   --panel: #ffffff;
-  --soft: #f4f7f5;
+  --soft: #fff8d6;
   --mint: #d8f0df;
   --green: #0c6b4f;
   --green-dark: #084b39;
   --coral: #d7573f;
   --amber: #f3b545;
+  --cream: #fffbd1;
+  --sky: #e7ecf7;
 }
 
 * {
@@ -18,7 +20,7 @@
 
 body {
   margin: 0;
-  background: #e7ecf7;
+  background: var(--cream);
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -46,12 +48,15 @@ main {
 .topbar {
   align-items: center;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.85), transparent 24%),
-    linear-gradient(135deg, #cfd7f4 0%, #e7ecf7 48%, #d9f4c7 100%);
-  border-bottom: 1px solid var(--line);
+    linear-gradient(rgba(12, 107, 79, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 107, 79, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 72% 40%, rgba(243, 181, 69, 0.32), transparent 26%),
+    linear-gradient(135deg, #fffbd1 0%, #fff6c4 54%, #d9f4c7 100%);
+  background-size: 42px 42px, 42px 42px, auto, auto;
+  border-bottom: 2px solid #18211d;
   display: flex;
   justify-content: space-between;
-  min-height: 210px;
+  min-height: 270px;
   padding: 42px clamp(20px, 6vw, 72px);
 }
 
@@ -64,8 +69,9 @@ p {
 }
 
 h1 {
-  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 0.95;
+  text-transform: uppercase;
 }
 
 h2 {
@@ -91,7 +97,7 @@ h4 {
 
 .modeSwitch {
   background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--line);
+  border: 1px solid #18211d;
   border-radius: 8px;
   display: grid;
   gap: 4px;
@@ -100,14 +106,19 @@ h4 {
 }
 
 .modeSwitch button,
+.modeSwitch a,
 .statusButtons button,
 .ratingRow button {
+  align-items: center;
   background: transparent;
   border: 0;
   border-radius: 6px;
   color: var(--muted);
+  display: flex;
+  justify-content: center;
   min-height: 40px;
   padding: 0 16px;
+  text-decoration: none;
 }
 
 .modeSwitch button.active,
@@ -115,6 +126,18 @@ h4 {
 .ratingRow button.active {
   background: var(--green);
   color: white;
+}
+
+.heroCopy {
+  max-width: 780px;
+}
+
+.heroCopy p:last-child {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 520px;
+  margin-top: 12px;
 }
 
 .notice,
@@ -146,7 +169,7 @@ h4 {
 .waiterLayout,
 .orderCard {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid #18211d;
   border-radius: 8px;
 }
 
@@ -159,6 +182,7 @@ h4 {
 
 .sidePanel {
   align-self: start;
+  box-shadow: 0 22px 50px rgba(24, 35, 54, 0.12);
   position: sticky;
   top: 18px;
 }
@@ -173,7 +197,7 @@ h4 {
 
 .ghostButton,
 .primaryButton {
-  border: 1px solid var(--green);
+  border: 1px solid #18211d;
   border-radius: 6px;
   min-height: 42px;
   padding: 0 16px;
@@ -186,6 +210,7 @@ h4 {
 
 .primaryButton {
   background: var(--green);
+  border-color: var(--green);
   color: white;
   width: 100%;
 }
@@ -216,7 +241,7 @@ h4 {
 
 .menuItem {
   align-items: stretch;
-  border: 1px solid var(--line);
+  border: 1px solid #18211d;
   border-radius: 8px;
   display: grid;
   gap: 14px;
@@ -227,7 +252,7 @@ h4 {
 
 .foodCard {
   background: #fff;
-  box-shadow: 0 18px 45px rgba(55, 74, 92, 0.08);
+  box-shadow: 10px 10px 0 rgba(12, 107, 79, 0.12);
 }
 
 .cardImageButton {
@@ -292,6 +317,32 @@ h4 {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: auto;
+}
+
+.menuTools {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 22px;
+}
+
+.categoryPills {
+  display: flex;
+  gap: 8px;
+}
+
+.categoryPills button {
+  background: #fff;
+  border: 1px solid #18211d;
+  border-radius: 999px;
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.categoryPills button.active {
+  background: #22ad5c;
+  color: #07110d;
+  font-weight: 800;
 }
 
 .menuItem p,
@@ -582,6 +633,131 @@ textarea {
   padding-top: 22px;
 }
 
+.adminHero {
+  background:
+    linear-gradient(rgba(12, 107, 79, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 107, 79, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, #fffbd1 0%, #cfeeb5 100%);
+  background-size: 40px 40px, 40px 40px, auto;
+  border-bottom: 2px solid #18211d;
+  padding: 24px clamp(20px, 6vw, 72px) 52px;
+}
+
+.siteNav {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.brandMark {
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.navPills {
+  display: flex;
+  gap: 8px;
+}
+
+.navPills a,
+.navPills span {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #18211d;
+  border-radius: 999px;
+  color: var(--ink);
+  padding: 10px 16px;
+  text-decoration: none;
+}
+
+.adminHeroText {
+  margin-top: 54px;
+  max-width: 760px;
+}
+
+.adminHeroText p:last-child {
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.55;
+  margin-top: 12px;
+}
+
+.adminPage {
+  display: grid;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1240px;
+  padding: 28px clamp(16px, 4vw, 40px);
+}
+
+.adminCreatePanel,
+.adminMenuCard {
+  background: #fff;
+  border: 1px solid #18211d;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.adminCreatePanel {
+  display: grid;
+  gap: 14px;
+}
+
+.adminCreateGrid,
+.adminEditGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.adminEditGrid {
+  grid-template-columns: minmax(180px, 1fr) 110px 120px 110px 110px 90px;
+}
+
+.adminEditGrid.triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.adminListHeader {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+}
+
+.adminMenuList {
+  display: grid;
+  gap: 14px;
+}
+
+.adminMenuCard {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.adminPreview {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+}
+
+.adminPreview img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.adminMenuCard textarea,
+.adminMenuCard > input,
+.adminMenuCard > .adminEditGrid,
+.adminMenuCard > button {
+  grid-column: 2;
+}
+
 .adminForm .primaryButton {
   height: 42px;
 }
@@ -625,8 +801,26 @@ textarea {
   .statusColumns,
   .ordersGrid,
   .adminForm,
-  .adminRow {
+  .adminRow,
+  .adminMenuCard,
+  .menuTools,
+  .adminCreateGrid,
+  .adminEditGrid,
+  .adminEditGrid.triple {
     grid-template-columns: 1fr;
+  }
+
+  .adminPreview,
+  .adminMenuCard textarea,
+  .adminMenuCard > input,
+  .adminMenuCard > .adminEditGrid,
+  .adminMenuCard > button {
+    grid-column: 1;
+  }
+
+  .adminPreview {
+    height: 220px;
+    min-height: 220px;
   }
 
   .sidePanel {

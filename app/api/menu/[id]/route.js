@@ -102,6 +102,25 @@ export async function PATCH(request, { params }) {
       updates.push(`calories = $${values.length}`);
     }
 
+    if ("rating" in body) {
+      const rating = Number(body.rating);
+      if (!Number.isFinite(rating) || rating < 0 || rating > 5) return json({ error: "Rating must be between 0 and 5." }, 400);
+      values.push(rating);
+      updates.push(`rating = $${values.length}`);
+    }
+
+    for (const [bodyKey, column] of [
+      ["ingredients", "ingredients"],
+      ["allergens", "allergens"],
+      ["pairings", "pairings"]
+    ]) {
+      if (bodyKey in body) {
+        const value = Array.isArray(body[bodyKey]) ? body[bodyKey].map((item) => String(item).trim()).filter(Boolean) : [];
+        values.push(value);
+        updates.push(`${column} = $${values.length}`);
+      }
+    }
+
     if ("isAvailable" in body) {
       values.push(Boolean(body.isAvailable));
       updates.push(`is_available = $${values.length}`);

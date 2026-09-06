@@ -40,6 +40,9 @@ export async function POST(request) {
     const price = Number(body.price);
     const prepTime = Number(body.prepTimeMinutes);
     const category = body.category;
+    const ingredients = Array.isArray(body.ingredients) ? body.ingredients : [];
+    const allergens = Array.isArray(body.allergens) ? body.allergens : [];
+    const pairings = Array.isArray(body.pairings) ? body.pairings : [];
 
     if (!name || !Number.isFinite(price) || price <= 0 || !Number.isInteger(prepTime) || prepTime <= 0) {
       return json({ error: "Name, positive price, and positive prep time are required." }, 400);
@@ -51,8 +54,22 @@ export async function POST(request) {
 
     const { rows } = await query(
       `
-      insert into menu_item (name, price, prep_time_minutes, category, is_available, description, image_url, source_url, calories, rating)
-      values ($1, $2, $3, $4, true, $5, $6, $7, $8, $9)
+      insert into menu_item (
+        name,
+        price,
+        prep_time_minutes,
+        category,
+        is_available,
+        description,
+        image_url,
+        source_url,
+        calories,
+        rating,
+        ingredients,
+        allergens,
+        pairings
+      )
+      values ($1, $2, $3, $4, true, $5, $6, $7, $8, $9, $10, $11, $12)
       returning id, name, price, prep_time_minutes, category, is_available, description, image_url, source_url, calories, rating, ingredients, allergens, pairings
       `,
       [
@@ -64,7 +81,10 @@ export async function POST(request) {
         body.imageUrl || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
         body.sourceUrl || "",
         Number(body.calories) || null,
-        Number(body.rating) || 4.6
+        Number(body.rating) || 4.6,
+        ingredients,
+        allergens,
+        pairings
       ]
     );
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 const statusLabels = {
   placed: "Placed",
@@ -36,12 +37,12 @@ async function api(path, options) {
 export default function Home() {
   const [mode, setMode] = useState("customer");
   const [menu, setMenu] = useState([]);
-  const [adminMenu, setAdminMenu] = useState([]);
   const [orders, setOrders] = useState([]);
   const [staff, setStaff] = useState({ waiters: [], chefs: [], bartenders: [] });
   const [cart, setCart] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
-  const [menuForm, setMenuForm] = useState({ name: "", price: "", prepTimeMinutes: "", category: "food" });
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeOrder, setActiveOrder] = useState(null);
   const [complaint, setComplaint] = useState("");
   const [ratingScore, setRatingScore] = useState(5);
@@ -68,7 +69,6 @@ export default function Home() {
         api("/api/orders")
       ]);
       setMenu(menuData);
-      setAdminMenu(menuData);
       setStaff(staffData);
       setOrders(orderData);
       setMessage("");
@@ -191,58 +191,30 @@ export default function Home() {
     }
   }
 
-  async function loadAdminMenu() {
-    try {
-      const data = await api("/api/menu?all=1");
-      setAdminMenu(data);
-      setMenu(data.filter((item) => item.is_available));
-    } catch (error) {
-      setMessage(error.message);
-    }
-  }
-
-  async function createMenuItem(event) {
-    event.preventDefault();
-    try {
-      await api("/api/menu", {
-        method: "POST",
-        body: JSON.stringify({
-          name: menuForm.name,
-          price: menuForm.price,
-          prepTimeMinutes: Number(menuForm.prepTimeMinutes),
-          category: menuForm.category
-        })
-      });
-      setMenuForm({ name: "", price: "", prepTimeMinutes: "", category: "food" });
-      await loadAdminMenu();
-    } catch (error) {
-      setMessage(error.message);
-    }
-  }
-
-  async function updateMenuItem(item, patch) {
-    try {
-      await api(`/api/menu/${item.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(patch)
-      });
-      await loadAdminMenu();
-    } catch (error) {
-      setMessage(error.message);
-    }
-  }
+  const visibleMenu = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return menu.filter((item) => {
+      const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+      const matchesSearch =
+        !term ||
+        item.name.toLowerCase().includes(term) ||
+        String(item.description || "").toLowerCase().includes(term);
+      return matchesCategory && matchesSearch;
+    });
+  }, [categoryFilter, menu, search]);
 
   const groupedMenu = {
-    food: menu.filter((item) => item.category === "food"),
-    drink: menu.filter((item) => item.category === "drink")
+    food: visibleMenu.filter((item) => item.category === "food"),
+    drink: visibleMenu.filter((item) => item.category === "drink")
   };
 
   return (
     <main>
       <header className="topbar">
-        <div>
-          <p className="eyebrow">Digital dine-in ordering</p>
+        <div className="heroCopy">
+          <p className="eyebrow">Restaurant table ordering</p>
           <h1>Chowly</h1>
+          <p>Browse Nigerian dishes, build a table order, and track it from kitchen assignment to payment.</p>
         </div>
         <div className="modeSwitch" aria-label="Choose app mode">
           <button className={mode === "customer" ? "active" : ""} onClick={() => setMode("customer")}>
@@ -251,9 +223,7 @@ export default function Home() {
           <button className={mode === "waiter" ? "active" : ""} onClick={() => setMode("waiter")}>
             Waiter
           </button>
-          <button className={mode === "admin" ? "active" : ""} onClick={() => { setMode("admin"); loadAdminMenu(); }}>
-            Admin
-          </button>
+          <Link href="/admin">Admin</Link>
         </div>
       </header>
 
@@ -273,13 +243,23 @@ export default function Home() {
             <div className="sectionHeader">
               <div>
                 <p className="eyebrow">Menu</p>
-                <h2>Order for your table</h2>
+                <h2>Order now</h2>
               </div>
               <button className="ghostButton" onClick={loadBaseData}>Refresh</button>
             </div>
 
+            <div className="menuTools">
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search rice, suya, zobo..." />
+              <div className="categoryPills">
+                <button className={categoryFilter === "all" ? "active" : ""} onClick={() => setCategoryFilter("all")}>All</button>
+                <button className={categoryFilter === "food" ? "active" : ""} onClick={() => setCategoryFilter("food")}>Foods</button>
+                <button className={categoryFilter === "drink" ? "active" : ""} onClick={() => setCategoryFilter("drink")}>Drinks</button>
+              </div>
+            </div>
+
             {loading ? <p className="empty">Loading Chowly...</p> : null}
             {!loading && menu.length === 0 ? <p className="empty">The menu is currently unavailable.</p> : null}
+            {!loading && menu.length > 0 && visibleMenu.length === 0 ? <p className="empty">No menu item matches that search.</p> : null}
 
             {["food", "drink"].map((category) => (
               groupedMenu[category].length > 0 && (
@@ -358,7 +338,7 @@ export default function Home() {
             />
           )}
         </section>
-      ) : mode === "waiter" ? (
+      ) : (
         <section className="waiterLayout">
           <div className="sectionHeader">
             <div>
@@ -434,15 +414,6 @@ export default function Home() {
             ))}
           </div>
         </section>
-      ) : (
-        <AdminMenu
-          items={adminMenu}
-          form={menuForm}
-          onFormChange={setMenuForm}
-          onCreate={createMenuItem}
-          onRefresh={loadAdminMenu}
-          onUpdate={updateMenuItem}
-        />
       )}
     </main>
   );
@@ -590,78 +561,6 @@ function ItemDetail({ item, quantity, onBack, onAdd, onRemove }) {
             <button className="primaryButton" onClick={onAdd}>Add to order</button>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function AdminMenu({ items, form, onFormChange, onCreate, onRefresh, onUpdate }) {
-  return (
-    <section className="waiterLayout">
-      <div className="sectionHeader">
-        <div>
-          <p className="eyebrow">Admin</p>
-          <h2>Manage menu</h2>
-        </div>
-        <button className="ghostButton" onClick={onRefresh}>Refresh</button>
-      </div>
-
-      <form className="adminForm" onSubmit={onCreate}>
-        <input
-          value={form.name}
-          onChange={(event) => onFormChange((current) => ({ ...current, name: event.target.value }))}
-          placeholder="Item name"
-        />
-        <input
-          value={form.price}
-          onChange={(event) => onFormChange((current) => ({ ...current, price: event.target.value }))}
-          placeholder="Price"
-          type="number"
-          min="1"
-          step="50"
-        />
-        <input
-          value={form.prepTimeMinutes}
-          onChange={(event) => onFormChange((current) => ({ ...current, prepTimeMinutes: event.target.value }))}
-          placeholder="Prep minutes"
-          type="number"
-          min="1"
-          step="1"
-        />
-        <select value={form.category} onChange={(event) => onFormChange((current) => ({ ...current, category: event.target.value }))}>
-          <option value="food">Food</option>
-          <option value="drink">Drink</option>
-        </select>
-        <button className="primaryButton">Add item</button>
-      </form>
-
-      <div className="adminTable">
-        {items.map((item) => (
-          <article className={!item.is_available ? "adminRow mutedRow" : "adminRow"} key={item.id}>
-            <input defaultValue={item.name} onBlur={(event) => event.target.value !== item.name && onUpdate(item, { name: event.target.value })} />
-            <input
-              defaultValue={Number(item.price)}
-              min="1"
-              onBlur={(event) => Number(event.target.value) !== Number(item.price) && onUpdate(item, { price: event.target.value })}
-              step="50"
-              type="number"
-            />
-            <input
-              defaultValue={item.prep_time_minutes}
-              min="1"
-              onBlur={(event) => Number(event.target.value) !== Number(item.prep_time_minutes) && onUpdate(item, { prepTimeMinutes: Number(event.target.value) })}
-              step="1"
-              type="number"
-            />
-            <select defaultValue={item.category} onChange={(event) => onUpdate(item, { category: event.target.value })}>
-              <option value="food">Food</option>
-              <option value="drink">Drink</option>
-            </select>
-            <button className="ghostButton" onClick={() => onUpdate(item, { isAvailable: !item.is_available })}>
-              {item.is_available ? "Hide" : "Show"}
-            </button>
-          </article>
-        ))}
       </div>
     </section>
   );
