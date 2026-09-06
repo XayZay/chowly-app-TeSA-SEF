@@ -18,6 +18,8 @@ Open `http://localhost:3000`.
 
 ## Implemented flow
 
-- Customer browses available menu items, builds a cart, places an order, sees a prep-time estimate, complains, rates, and records a clearly labeled pretend payment.
-- Waiter opens orders, assigns waiter/chef/bartender names, advances order status, and marks orders served.
+- Customer browses available menu items, builds a cart, places an order, sees a prep-time estimate, complains, rates, and pays.
+- New orders are automatically assigned to a waiter, chef, and bartender, then shown in the waiter dashboard.
+- Waiter reviews retained orders, advances order status, and marks orders served.
+- Admin manages menu item names, prices, prep times, categories, and availability.
 - API routes persist all core records in Postgres with UUID primary keys, transaction-backed order creation, one rating per order, frozen order item prices, and idempotent payments.

@@ -93,7 +93,7 @@ h4 {
   border-radius: 8px;
   display: grid;
   gap: 4px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   padding: 4px;
 }
 
@@ -383,6 +383,40 @@ textarea {
   margin-top: 16px;
 }
 
+.adminForm {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 1.2fr) 120px 140px 120px 140px;
+  margin-top: 22px;
+  padding-top: 22px;
+}
+
+.adminForm .primaryButton {
+  height: 42px;
+}
+
+.adminTable {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.adminRow {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 1.2fr) 120px 140px 120px 100px;
+  padding: 12px;
+}
+
+.mutedRow {
+  background: var(--soft);
+  opacity: 0.72;
+}
+
 .statusButtons button {
   border: 1px solid var(--line);
   min-height: 38px;
@@ -399,7 +433,9 @@ textarea {
 
   .customerLayout,
   .statusColumns,
-  .ordersGrid {
+  .ordersGrid,
+  .adminForm,
+  .adminRow {
     grid-template-columns: 1fr;
   }
 

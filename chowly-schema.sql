@@ -88,12 +88,13 @@ insert into menu_item (name, price, prep_time_minutes, category, is_available)
 select name, price, prep_time_minutes, category, true
 from (
   values
-    ('Jollof Arancini', 8.50, 12, 'food'),
-    ('Suya Steak Bowl', 16.00, 18, 'food'),
-    ('Plantain Tacos', 11.25, 10, 'food'),
-    ('Coconut Rice Prawns', 19.75, 22, 'food'),
-    ('Zobo Spritz', 6.50, 4, 'drink'),
-    ('Ginger Lime Cooler', 5.75, 3, 'drink'),
-    ('Chapman Royale', 7.25, 5, 'drink')
+    ('Jollof Rice and Chicken', 4500.00, 20, 'food'),
+    ('Pounded Yam and Egusi', 5200.00, 25, 'food'),
+    ('Amala and Ewedu', 4000.00, 18, 'food'),
+    ('Suya Platter', 3500.00, 15, 'food'),
+    ('Moi Moi', 1200.00, 10, 'food'),
+    ('Zobo Drink', 1000.00, 4, 'drink'),
+    ('Chapman', 1800.00, 5, 'drink'),
+    ('Fresh Palm Wine', 1500.00, 3, 'drink')
 ) as seed(name, price, prep_time_minutes, category)
 where not exists (select 1 from menu_item where menu_item.name = seed.name);

@@ -94,9 +94,23 @@ export async function POST(request) {
 
       const menuById = new Map(menuResult.rows.map((item) => [item.id, item]));
       const waitTime = Math.max(...menuResult.rows.map((item) => item.prep_time_minutes));
+      const [waiterResult, chefResult, bartenderResult] = await Promise.all([
+        client.query("select id from waiter order by random() limit 1"),
+        client.query("select id from chef order by random() limit 1"),
+        client.query("select id from bartender order by random() limit 1")
+      ]);
       const orderResult = await client.query(
-        'insert into "order" (wait_time_minutes) values ($1) returning id',
-        [waitTime]
+        `
+        insert into "order" (waiter_id, chef_id, bartender_id, status, wait_time_minutes)
+        values ($1, $2, $3, 'in_progress', $4)
+        returning id
+        `,
+        [
+          waiterResult.rows[0]?.id || null,
+          chefResult.rows[0]?.id || null,
+          bartenderResult.rows[0]?.id || null,
+          waitTime
+        ]
       );
       const orderId = orderResult.rows[0].id;
 

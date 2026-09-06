@@ -5,3 +5,5 @@ node_modules
 out
 coverage
 npm-debug.log*
+AGENTS.md
+CLAUDE.md
