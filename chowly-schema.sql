@@ -51,6 +51,7 @@ create table if not exists "order" (
   status text not null default 'placed' check (status in ('placed', 'in_progress', 'ready', 'served')),
   wait_time_minutes integer not null,
   is_paid boolean not null default false,
+  session_id text,
   placed_at timestamptz not null default now(),
   served_at timestamptz
 );

@@ -73,11 +73,18 @@ export default function Home() {
 
   const loadBaseData = useCallback(async function loadBaseData() {
     setLoading(true);
+    
+    let sessionId = localStorage.getItem("chowly:sessionId");
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("chowly:sessionId", sessionId);
+    }
+
     try {
       const [menuResult, staffResult, orderResult] = await Promise.allSettled([
         api("/api/menu"),
         api("/api/staff"),
-        api("/api/orders")
+        api(`/api/orders${mode === "customer" ? "?sessionId=" + sessionId : ""}`)
       ]);
       const failures = [];
 
@@ -96,7 +103,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mode]);
 
   const loadOrder = useCallback(async function loadOrder(id) {
     if (!id) return;
@@ -143,10 +150,12 @@ export default function Home() {
     if (cartItems.length === 0) return;
     setMessage("");
     try {
+      const sessionId = localStorage.getItem("chowly:sessionId");
       const order = await api("/api/orders", {
         method: "POST",
         body: JSON.stringify({
-          items: cartItems.map((item) => ({ menuItemId: item.id, quantity: item.quantity }))
+          items: cartItems.map((item) => ({ menuItemId: item.id, quantity: item.quantity })),
+          sessionId
         })
       });
       setActiveOrder(order);

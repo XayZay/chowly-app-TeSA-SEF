@@ -25,6 +25,18 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeServed = searchParams.get("includeServed") === "1";
+    const sessionId = searchParams.get("sessionId");
+    
+    let whereClause = "";
+    const params = [];
+    if (!includeServed) {
+      whereClause += "where o.status != 'served'";
+    }
+    if (sessionId) {
+      whereClause += whereClause ? " and o.session_id = $1" : "where o.session_id = $1";
+      params.push(sessionId);
+    }
+    
     const { rows } = await query(
       `
       select
@@ -59,10 +71,11 @@ export async function GET(request) {
       left join bartender b on b.id = o.bartender_id
       left join order_item oi on oi.order_id = o.id
       left join menu_item mi on mi.id = oi.menu_item_id
-      ${includeServed ? "" : "where o.status != 'served'"}
+      ${whereClause}
       group by o.id, w.name, c.name, b.name
       order by o.placed_at desc
-      `
+      `,
+      params
     );
 
     return json(rows.map((row) => ({ ...row, total: Number(row.total || 0), items: row.items || [] })));
@@ -75,6 +88,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const items = normalizeItems(body.items);
+    const sessionId = body.sessionId || null;
 
     if (!items) {
       return json({ error: "Order must include at least one valid item quantity." }, 400);
@@ -104,15 +118,16 @@ export async function POST(request) {
       ]);
       const orderResult = await client.query(
         `
-        insert into "order" (waiter_id, chef_id, bartender_id, status, wait_time_minutes)
-        values ($1, $2, $3, 'placed', $4)
+        insert into "order" (waiter_id, chef_id, bartender_id, status, wait_time_minutes, session_id)
+        values ($1, $2, $3, 'placed', $4, $5)
         returning id
         `,
         [
           waiterResult.rows[0]?.id || null,
           chefResult.rows[0]?.id || null,
           bartenderResult.rows[0]?.id || null,
-          waitTime
+          waitTime,
+          sessionId
         ]
       );
       const orderId = orderResult.rows[0].id;
