@@ -46,6 +46,9 @@ const emptyForm = {
 export default function AdminPage() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -62,8 +65,44 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    loadMenu();
+    async function checkSession() {
+      try {
+        const session = await api("/api/admin/session");
+        setAuthenticated(session.authenticated);
+        if (session.authenticated) {
+          await loadMenu();
+        }
+      } catch (error) {
+        setMessage(error.message);
+      } finally {
+        setCheckingSession(false);
+        setLoading(false);
+      }
+    }
+
+    checkSession();
   }, [loadMenu]);
+
+  async function login(event) {
+    event.preventDefault();
+    try {
+      await api("/api/admin/login", {
+        method: "POST",
+        body: JSON.stringify(loginForm)
+      });
+      setAuthenticated(true);
+      setLoginForm({ username: "", password: "" });
+      await loadMenu();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  }
+
+  async function logout() {
+    await api("/api/admin/session", { method: "DELETE" });
+    setAuthenticated(false);
+    setItems([]);
+  }
 
   async function createItem(event) {
     event.preventDefault();
@@ -111,7 +150,7 @@ export default function AdminPage() {
           <Link href="/" className="brandMark">Chowly</Link>
           <div className="navPills">
             <Link href="/">Restaurant</Link>
-            <span>Admin</span>
+            {authenticated ? <button onClick={logout}>Logout</button> : <span>Admin</span>}
           </div>
         </nav>
         <div className="adminHeroText">
@@ -123,7 +162,33 @@ export default function AdminPage() {
 
       {message && <div className="notice">{message}</div>}
 
-      <section className="adminPage">
+      {!authenticated ? (
+        <section className="adminPage">
+          <form className="loginPanel" onSubmit={login}>
+            <div>
+              <p className="eyebrow">Protected area</p>
+              <h2>{checkingSession ? "Checking session" : "Admin login"}</h2>
+            </div>
+            <input
+              autoComplete="username"
+              disabled={checkingSession}
+              onChange={(event) => setLoginForm((current) => ({ ...current, username: event.target.value }))}
+              placeholder="Username"
+              value={loginForm.username}
+            />
+            <input
+              autoComplete="current-password"
+              disabled={checkingSession}
+              onChange={(event) => setLoginForm((current) => ({ ...current, password: event.target.value }))}
+              placeholder="Password"
+              type="password"
+              value={loginForm.password}
+            />
+            <button className="primaryButton" disabled={checkingSession}>Login</button>
+          </form>
+        </section>
+      ) : (
+        <section className="adminPage">
         <form className="adminCreatePanel" onSubmit={createItem}>
           <div>
             <p className="eyebrow">New item</p>
@@ -191,6 +256,7 @@ export default function AdminPage() {
           ))}
         </div>
       </section>
+      )}
     </main>
   );
 }

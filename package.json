@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed:admin": "node scripts/seed-admin.js",
+    "seed:menu": "node scripts/seed-rich-menu.js"
   },
   "dependencies": {
     "next": "^16.3.4",

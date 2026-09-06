@@ -1,9 +1,14 @@
 import { json, query, serverError } from "../../../lib/db";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const includeUnavailable = searchParams.get("all") === "1";
+    if (includeUnavailable) {
+      const authError = await requireAdmin();
+      if (authError) return authError;
+    }
     const { rows } = await query(
       `
       select
@@ -35,6 +40,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const body = await request.json();
     const name = String(body.name || "").trim();
     const price = Number(body.price);

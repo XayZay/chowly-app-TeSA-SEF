@@ -21,8 +21,10 @@ function normalizeItems(items) {
   return Array.from(quantities, ([menuItemId, quantity]) => ({ menuItemId, quantity }));
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const includeServed = searchParams.get("includeServed") === "1";
     const { rows } = await query(
       `
       select
@@ -57,6 +59,7 @@ export async function GET() {
       left join bartender b on b.id = o.bartender_id
       left join order_item oi on oi.order_id = o.id
       left join menu_item mi on mi.id = oi.menu_item_id
+      ${includeServed ? "" : "where o.status != 'served'"}
       group by o.id, w.name, c.name, b.name
       order by o.placed_at desc
       `

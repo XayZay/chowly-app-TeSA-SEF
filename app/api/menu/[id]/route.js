@@ -1,4 +1,5 @@
 import { isUuid, json, query, serverError } from "../../../../lib/db";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export async function GET(_request, { params }) {
   try {
@@ -43,6 +44,9 @@ export async function GET(_request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const { id } = await params;
 
     if (!isUuid(id)) {

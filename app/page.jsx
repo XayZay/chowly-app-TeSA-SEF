@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 
 const statusLabels = {
   placed: "Placed",
@@ -178,6 +177,11 @@ export default function Home() {
     }
   }
 
+  function closeCompletedOrder() {
+    setActiveOrder(null);
+    localStorage.removeItem("chowly:lastOrderId");
+  }
+
   async function updateOrder(orderId, patch) {
     try {
       const order = await api(`/api/orders/${orderId}`, {
@@ -223,7 +227,6 @@ export default function Home() {
           <button className={mode === "waiter" ? "active" : ""} onClick={() => setMode("waiter")}>
             Waiter
           </button>
-          <Link href="/admin">Admin</Link>
         </div>
       </header>
 
@@ -335,6 +338,7 @@ export default function Home() {
               onSubmitComplaint={submitComplaint}
               onSubmitRating={submitRating}
               onPay={payOrder}
+              onClose={closeCompletedOrder}
             />
           )}
         </section>
@@ -344,6 +348,7 @@ export default function Home() {
             <div>
               <p className="eyebrow">Waiter dashboard</p>
               <h2>Open orders</h2>
+              <p className="sectionNote">Served orders leave this active queue automatically.</p>
             </div>
             <button className="ghostButton" onClick={loadBaseData}>Refresh</button>
           </div>
@@ -430,8 +435,11 @@ function OrderStatus({
   onRefresh,
   onSubmitComplaint,
   onSubmitRating,
-  onPay
+  onPay,
+  onClose
 }) {
+  const isComplete = order.status === "served" && order.is_paid;
+
   return (
     <section className="statusPanel">
       <div className="sectionHeader">
@@ -475,10 +483,14 @@ function OrderStatus({
           <button className="primaryButton" disabled={order.is_paid} onClick={onPay}>
             {order.is_paid ? "Paid" : "Pay"}
           </button>
+          {isComplete ? (
+            <button className="ghostButton full followButton" onClick={onClose}>Start new order</button>
+          ) : null}
         </div>
 
         <div>
-          <h3>Feedback</h3>
+          <h3>{isComplete ? "Order complete" : "Feedback"}</h3>
+          {isComplete ? <p className="staffLine">Thanks. This table order has been served and paid.</p> : null}
           <textarea value={complaint} onChange={(event) => onComplaintChange(event.target.value)} placeholder="Describe a delay or issue" />
           <button className="ghostButton full" onClick={onSubmitComplaint}>Submit complaint</button>
 
