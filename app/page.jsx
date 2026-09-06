@@ -40,6 +40,7 @@ export default function Home() {
   const [orders, setOrders] = useState([]);
   const [staff, setStaff] = useState({ waiters: [], chefs: [], bartenders: [] });
   const [cart, setCart] = useState({});
+  const [selectedItem, setSelectedItem] = useState(null);
   const [menuForm, setMenuForm] = useState({ name: "", price: "", prepTimeMinutes: "", category: "food" });
   const [activeOrder, setActiveOrder] = useState(null);
   const [complaint, setComplaint] = useState("");
@@ -112,6 +113,11 @@ export default function Home() {
       }
       return next;
     });
+  }
+
+  function openItem(item) {
+    setSelectedItem(item);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function placeOrder() {
@@ -253,7 +259,15 @@ export default function Home() {
 
       {message && <div className="notice">{message}</div>}
 
-      {mode === "customer" ? (
+      {mode === "customer" && selectedItem ? (
+        <ItemDetail
+          item={selectedItem}
+          quantity={cart[selectedItem.id] || 0}
+          onBack={() => setSelectedItem(null)}
+          onAdd={() => changeQty(selectedItem.id, 1)}
+          onRemove={() => changeQty(selectedItem.id, -1)}
+        />
+      ) : mode === "customer" ? (
         <section className="customerLayout">
           <div className="menuPane">
             <div className="sectionHeader">
@@ -273,16 +287,27 @@ export default function Home() {
                   <h3>{category === "food" ? "Kitchen" : "Bar"}</h3>
                   <div className="menuGrid">
                     {groupedMenu[category].map((item) => (
-                      <article className="menuItem" key={item.id}>
-                        <div>
+                      <article className="menuItem foodCard" key={item.id}>
+                        <button className="cardImageButton" onClick={() => openItem(item)} aria-label={`View ${item.name}`}>
+                          <img src={item.image_url} alt={item.name} />
+                        </button>
+                        <div className="foodCardBody">
                           <h4>{item.name}</h4>
-                          <p>{item.prep_time_minutes} min prep</p>
+                          <p>{item.description}</p>
+                          <div className="foodMeta">
+                            <span>{item.calories || "Fresh"} kcal</span>
+                            <span>{item.prep_time_minutes} min</span>
+                            <span>{Number(item.rating || 4.7).toFixed(1)} rating</span>
+                          </div>
                         </div>
-                        <strong>{money(item.price)}</strong>
-                        <div className="stepper">
-                          <button aria-label={`Remove ${item.name}`} onClick={() => changeQty(item.id, -1)}>-</button>
-                          <span>{cart[item.id] || 0}</span>
-                          <button aria-label={`Add ${item.name}`} onClick={() => changeQty(item.id, 1)}>+</button>
+                        <div className="foodCardActions">
+                          <strong>{money(item.price)}</strong>
+                          <button className="ghostButton" onClick={() => openItem(item)}>Details</button>
+                          <div className="stepper">
+                            <button aria-label={`Remove ${item.name}`} onClick={() => changeQty(item.id, -1)}>-</button>
+                            <span>{cart[item.id] || 0}</span>
+                            <button aria-label={`Add ${item.name}`} onClick={() => changeQty(item.id, 1)}>+</button>
+                          </div>
                         </div>
                       </article>
                     ))}
@@ -496,6 +521,74 @@ function OrderStatus({
           <input value={ratingComment} onChange={(event) => onRatingCommentChange(event.target.value)} placeholder="Optional rating comment" />
           <button className="ghostButton full" onClick={onSubmitRating}>Submit rating</button>
           {order.rating ? <p className="finePrint">Current rating: {order.rating.score}/5</p> : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ItemDetail({ item, quantity, onBack, onAdd, onRemove }) {
+  const ingredients = item.ingredients || [];
+  const allergens = item.allergens || [];
+  const pairings = item.pairings || [];
+
+  return (
+    <section className="detailShell">
+      <div className="phoneDetail">
+        <div className="detailHero">
+          <img src={item.image_url} alt={item.name} />
+          <button className="roundButton left" onClick={onBack} aria-label="Back to menu">‹</button>
+          <span className="roundButton right" aria-label="Rating">{Number(item.rating || 4.7).toFixed(1)}</span>
+        </div>
+
+        <div className="detailSheet">
+          <div className="detailTitle">
+            <h2>{item.name}</h2>
+            <strong>{money(item.price)}</strong>
+          </div>
+          <p className="detailDescription">{item.description}</p>
+
+          <div className="detailStats">
+            <span>{item.calories || "Fresh"} kcal</span>
+            <span>{item.prep_time_minutes} min</span>
+            <span>{item.category === "food" ? "Meal" : "Drink"}</span>
+          </div>
+
+          <h3>Key ingredients</h3>
+          <div className="ingredientGrid">
+            {ingredients.map((ingredient) => (
+              <span key={ingredient}>{ingredient}</span>
+            ))}
+          </div>
+
+          <h3>Allergens</h3>
+          <div className="tagRow">
+            {allergens.map((allergen) => (
+              <span key={allergen}>{allergen}</span>
+            ))}
+          </div>
+
+          <h3>Pairing suggestion</h3>
+          <div className="tagRow">
+            {pairings.map((pairing) => (
+              <span key={pairing}>{pairing}</span>
+            ))}
+          </div>
+
+          {item.source_url ? (
+            <a className="sourceLink" href={item.source_url} target="_blank" rel="noreferrer">
+              View online source
+            </a>
+          ) : null}
+
+          <div className="detailCart">
+            <div className="stepper">
+              <button aria-label={`Remove ${item.name}`} onClick={onRemove}>-</button>
+              <span>{quantity}</span>
+              <button aria-label={`Add ${item.name}`} onClick={onAdd}>+</button>
+            </div>
+            <button className="primaryButton" onClick={onAdd}>Add to order</button>
+          </div>
         </div>
       </div>
     </section>

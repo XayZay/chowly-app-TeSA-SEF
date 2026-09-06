@@ -6,7 +6,21 @@ export async function GET(request) {
     const includeUnavailable = searchParams.get("all") === "1";
     const { rows } = await query(
       `
-      select id, name, price, prep_time_minutes, category, is_available
+      select
+        id,
+        name,
+        price,
+        prep_time_minutes,
+        category,
+        is_available,
+        description,
+        image_url,
+        source_url,
+        calories,
+        rating,
+        ingredients,
+        allergens,
+        pairings
       from menu_item
       ${includeUnavailable ? "" : "where is_available = true"}
       order by category, name
@@ -37,11 +51,21 @@ export async function POST(request) {
 
     const { rows } = await query(
       `
-      insert into menu_item (name, price, prep_time_minutes, category, is_available)
-      values ($1, $2, $3, $4, true)
-      returning id, name, price, prep_time_minutes, category, is_available
+      insert into menu_item (name, price, prep_time_minutes, category, is_available, description, image_url, source_url, calories, rating)
+      values ($1, $2, $3, $4, true, $5, $6, $7, $8, $9)
+      returning id, name, price, prep_time_minutes, category, is_available, description, image_url, source_url, calories, rating, ingredients, allergens, pairings
       `,
-      [name, price, prepTime, category]
+      [
+        name,
+        price,
+        prepTime,
+        category,
+        body.description || "Freshly prepared Chowly menu item.",
+        body.imageUrl || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+        body.sourceUrl || "",
+        Number(body.calories) || null,
+        Number(body.rating) || 4.6
+      ]
     );
 
     return json(rows[0], 201);

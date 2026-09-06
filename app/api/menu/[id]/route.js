@@ -1,5 +1,46 @@
 import { isUuid, json, query, serverError } from "../../../../lib/db";
 
+export async function GET(_request, { params }) {
+  try {
+    const { id } = await params;
+
+    if (!isUuid(id)) {
+      return json({ error: "Invalid menu item ID." }, 400);
+    }
+
+    const { rows } = await query(
+      `
+      select
+        id,
+        name,
+        price,
+        prep_time_minutes,
+        category,
+        is_available,
+        description,
+        image_url,
+        source_url,
+        calories,
+        rating,
+        ingredients,
+        allergens,
+        pairings
+      from menu_item
+      where id = $1
+      `,
+      [id]
+    );
+
+    if (!rows[0]) {
+      return json({ error: "Menu item not found." }, 404);
+    }
+
+    return json(rows[0]);
+  } catch (error) {
+    return serverError(error);
+  }
+}
+
 export async function PATCH(request, { params }) {
   try {
     const { id } = await params;
@@ -39,6 +80,28 @@ export async function PATCH(request, { params }) {
       updates.push(`category = $${values.length}`);
     }
 
+    if ("description" in body) {
+      values.push(String(body.description || "").trim());
+      updates.push(`description = $${values.length}`);
+    }
+
+    if ("imageUrl" in body) {
+      values.push(String(body.imageUrl || "").trim());
+      updates.push(`image_url = $${values.length}`);
+    }
+
+    if ("sourceUrl" in body) {
+      values.push(String(body.sourceUrl || "").trim());
+      updates.push(`source_url = $${values.length}`);
+    }
+
+    if ("calories" in body) {
+      const calories = Number(body.calories);
+      if (!Number.isInteger(calories) || calories < 0) return json({ error: "Calories must be a positive integer." }, 400);
+      values.push(calories);
+      updates.push(`calories = $${values.length}`);
+    }
+
     if ("isAvailable" in body) {
       values.push(Boolean(body.isAvailable));
       updates.push(`is_available = $${values.length}`);
@@ -54,7 +117,7 @@ export async function PATCH(request, { params }) {
       update menu_item
       set ${updates.join(", ")}
       where id = $${values.length}
-      returning id, name, price, prep_time_minutes, category, is_available
+      returning id, name, price, prep_time_minutes, category, is_available, description, image_url, source_url, calories, rating, ingredients, allergens, pairings
       `,
       values
     );
