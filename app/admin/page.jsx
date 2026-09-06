@@ -3,18 +3,41 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function api(path, options) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
-  const data = await response.json();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(data.error || "Request failed");
+      if (!response.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+
+      return data;
+    } catch (error) {
+      if (attempt === 1) throw error;
+      await wait(500);
+    }
   }
+}
 
-  return data;
+function money(value) {
+  return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+
+function shortId(id = "") {
+  return id ? id.slice(0, 8).toUpperCase() : "";
+}
+
+function formatDate(value) {
+  return value ? new Intl.DateTimeFormat("en-NG", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not recorded";
 }
 
 function csvToList(value) {
@@ -45,6 +68,7 @@ const emptyForm = {
 
 export default function AdminPage() {
   const [items, setItems] = useState([]);
+  const [feedback, setFeedback] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [authenticated, setAuthenticated] = useState(false);
@@ -52,11 +76,22 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const loadMenu = useCallback(async function loadMenu() {
+  const loadAdminData = useCallback(async function loadAdminData() {
     setLoading(true);
     try {
-      setItems(await api("/api/menu?all=1"));
-      setMessage("");
+      const [menuResult, feedbackResult] = await Promise.allSettled([
+        api("/api/menu?all=1"),
+        api("/api/admin/feedback")
+      ]);
+      const failures = [];
+
+      if (menuResult.status === "fulfilled") setItems(menuResult.value);
+      else failures.push(`Menu: ${menuResult.reason.message}`);
+
+      if (feedbackResult.status === "fulfilled") setFeedback(feedbackResult.value);
+      else failures.push(`Feedback: ${feedbackResult.reason.message}`);
+
+      setMessage(failures.join("  "));
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -70,7 +105,7 @@ export default function AdminPage() {
         const session = await api("/api/admin/session");
         setAuthenticated(session.authenticated);
         if (session.authenticated) {
-          await loadMenu();
+          await loadAdminData();
         }
       } catch (error) {
         setMessage(error.message);
@@ -81,7 +116,7 @@ export default function AdminPage() {
     }
 
     checkSession();
-  }, [loadMenu]);
+  }, [loadAdminData]);
 
   async function login(event) {
     event.preventDefault();
@@ -92,7 +127,7 @@ export default function AdminPage() {
       });
       setAuthenticated(true);
       setLoginForm({ username: "", password: "" });
-      await loadMenu();
+      await loadAdminData();
     } catch (error) {
       setMessage(error.message);
     }
@@ -102,6 +137,7 @@ export default function AdminPage() {
     await api("/api/admin/session", { method: "DELETE" });
     setAuthenticated(false);
     setItems([]);
+    setFeedback([]);
   }
 
   async function createItem(event) {
@@ -125,7 +161,7 @@ export default function AdminPage() {
         })
       });
       setForm(emptyForm);
-      await loadMenu();
+      await loadAdminData();
     } catch (error) {
       setMessage(error.message);
     }
@@ -137,7 +173,7 @@ export default function AdminPage() {
         method: "PATCH",
         body: JSON.stringify(patch)
       });
-      await loadMenu();
+      await loadAdminData();
     } catch (error) {
       setMessage(error.message);
     }
@@ -189,7 +225,8 @@ export default function AdminPage() {
         </section>
       ) : (
         <section className="adminPage">
-        <form className="adminCreatePanel" onSubmit={createItem}>
+        <div className="adminSplit">
+          <form className="adminCreatePanel" onSubmit={createItem}>
           <div>
             <p className="eyebrow">New item</p>
             <h2>Add to menu</h2>
@@ -214,14 +251,51 @@ export default function AdminPage() {
             <input value={form.pairings} onChange={(event) => setForm((current) => ({ ...current, pairings: event.target.value }))} placeholder="Pairings, comma-separated" />
           </div>
           <button className="primaryButton">Add item</button>
-        </form>
+          </form>
+
+          <section className="feedbackPanel">
+            <div className="adminListHeader">
+              <div>
+                <p className="eyebrow">Feedback</p>
+                <h2>{feedback.length} order notes</h2>
+              </div>
+              <button className="ghostButton" onClick={loadAdminData}>Refresh</button>
+            </div>
+
+            {feedback.length === 0 ? <p className="empty">No complaints or ratings have been submitted yet.</p> : null}
+
+            <div className="feedbackList">
+              {feedback.map((order) => (
+                <article className="feedbackCard" key={order.id}>
+                  <div className="orderTop">
+                    <div>
+                      <p className="eyebrow">Order {shortId(order.id)}</p>
+                      <h3>{order.rating ? `${order.rating.score}/5 rating` : "Complaint submitted"}</h3>
+                    </div>
+                    <strong>{money(order.total)}</strong>
+                  </div>
+                  <p className="finePrint">{formatDate(order.rating?.submittedAt || order.complaints?.[0]?.submittedAt || order.placed_at)}</p>
+                  <div className="feedbackMeals">
+                    {order.items.map((item) => <span key={item.id}>{item.quantity}x {item.name}</span>)}
+                  </div>
+                  {order.rating ? (
+                    <p className="feedbackQuote">{order.rating.comment || "No rating comment added."}</p>
+                  ) : null}
+                  {order.complaints.map((complaint) => (
+                    <p className="feedbackQuote complaintQuote" key={complaint.id}>{complaint.description}</p>
+                  ))}
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
 
         <div className="adminListHeader">
           <div>
             <p className="eyebrow">Current items</p>
             <h2>{loading ? "Loading menu" : `${items.length} records`}</h2>
           </div>
-          <button className="ghostButton" onClick={loadMenu}>Refresh</button>
+          <button className="ghostButton" onClick={loadAdminData}>Refresh</button>
         </div>
 
         <div className="adminMenuList">

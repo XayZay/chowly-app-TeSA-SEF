@@ -19,18 +19,29 @@ function shortId(id = "") {
   return id ? id.slice(0, 8).toUpperCase() : "";
 }
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function api(path, options) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
-  const data = await response.json();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(data.error || "Request failed");
+      if (!response.ok) {
+        throw new Error(data.error || "Request failed");
+      }
+
+      return data;
+    } catch (error) {
+      if (attempt === 1) throw error;
+      await wait(500);
+    }
   }
-
-  return data;
 }
 
 export default function Home() {
@@ -62,15 +73,23 @@ export default function Home() {
   const loadBaseData = useCallback(async function loadBaseData() {
     setLoading(true);
     try {
-      const [menuData, staffData, orderData] = await Promise.all([
+      const [menuResult, staffResult, orderResult] = await Promise.allSettled([
         api("/api/menu"),
         api("/api/staff"),
         api("/api/orders")
       ]);
-      setMenu(menuData);
-      setStaff(staffData);
-      setOrders(orderData);
-      setMessage("");
+      const failures = [];
+
+      if (menuResult.status === "fulfilled") setMenu(menuResult.value);
+      else failures.push(`Menu: ${menuResult.reason.message}`);
+
+      if (staffResult.status === "fulfilled") setStaff(staffResult.value);
+      else failures.push(`Staff: ${staffResult.reason.message}`);
+
+      if (orderResult.status === "fulfilled") setOrders(orderResult.value);
+      else failures.push(`Orders: ${orderResult.reason.message}`);
+
+      setMessage(failures.join("  "));
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -218,7 +237,7 @@ export default function Home() {
         <div className="heroCopy">
           <p className="eyebrow">Restaurant table ordering</p>
           <h1>Chowly</h1>
-          <p>Browse Nigerian dishes, build a table order, and track it from kitchen assignment to payment.</p>
+          <p>Browse Nigerian dishes, place a table order, make a pretend payment, then follow waiter updates.</p>
         </div>
         <div className="modeSwitch" aria-label="Choose app mode">
           <button className={mode === "customer" ? "active" : ""} onClick={() => setMode("customer")}>
@@ -348,7 +367,7 @@ export default function Home() {
             <div>
               <p className="eyebrow">Waiter dashboard</p>
               <h2>Open orders</h2>
-              <p className="sectionNote">Served orders leave this active queue automatically.</p>
+              <p className="sectionNote">Orders stay placed until paid. Served orders leave this active queue automatically.</p>
             </div>
             <button className="ghostButton" onClick={loadBaseData}>Refresh</button>
           </div>
@@ -369,6 +388,7 @@ export default function Home() {
                 <div className="chips">
                   <span>{order.wait_time_minutes} min estimate</span>
                   <span>{order.is_paid ? "Paid" : "Unpaid"}</span>
+                  {!order.is_paid ? <span>Waiting for pretend payment</span> : null}
                 </div>
 
                 <div className="lineItems compact">
@@ -408,8 +428,10 @@ export default function Home() {
                   {statusSteps.map((status) => (
                     <button
                       className={order.status === status ? "active" : ""}
+                      disabled={!order.is_paid && status !== "placed"}
                       key={status}
                       onClick={() => updateOrder(order.id, { status })}
+                      title={!order.is_paid && status !== "placed" ? "Payment is required before moving this order forward." : ""}
                     >
                       {statusLabels[status]}
                     </button>
@@ -481,7 +503,7 @@ function OrderStatus({
           <p className="staffLine">Chef: {order.chef_name || "Not assigned"}</p>
           <p className="staffLine">Bartender: {order.bartender_name || "Not assigned"}</p>
           <button className="primaryButton" disabled={order.is_paid} onClick={onPay}>
-            {order.is_paid ? "Paid" : "Pay"}
+            {order.is_paid ? "Paid" : "Pretend payment"}
           </button>
           {isComplete ? (
             <button className="ghostButton full followButton" onClick={onClose}>Start new order</button>

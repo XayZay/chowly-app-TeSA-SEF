@@ -20,7 +20,11 @@
 
 body {
   margin: 0;
-  background: var(--cream);
+  background:
+    linear-gradient(rgba(12, 107, 79, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 107, 79, 0.045) 1px, transparent 1px),
+    #fff9d8;
+  background-size: 36px 36px;
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -50,14 +54,13 @@ main {
   background:
     linear-gradient(rgba(12, 107, 79, 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(12, 107, 79, 0.07) 1px, transparent 1px),
-    radial-gradient(circle at 72% 40%, rgba(243, 181, 69, 0.32), transparent 26%),
     linear-gradient(135deg, #fffbd1 0%, #fff6c4 54%, #d9f4c7 100%);
-  background-size: 42px 42px, 42px 42px, auto, auto;
+  background-size: 42px 42px, 42px 42px, auto;
   border-bottom: 2px solid #18211d;
   display: flex;
   justify-content: space-between;
-  min-height: 190px;
-  padding: 30px clamp(20px, 6vw, 72px);
+  min-height: 164px;
+  padding: 24px clamp(20px, 6vw, 72px);
 }
 
 h1,
@@ -175,6 +178,7 @@ h4 {
   color: #5d4510;
   margin-top: 20px;
   padding: 14px 16px;
+  white-space: pre-wrap;
 }
 
 .customerLayout {
@@ -815,6 +819,70 @@ textarea {
   padding: 0 8px;
 }
 
+.statusButtons button:disabled {
+  background: #eef0ed;
+  color: #89948f;
+}
+
+.adminSplit {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.8fr);
+}
+
+.feedbackPanel {
+  background: #fff;
+  border: 1px solid #18211d;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.feedbackList {
+  display: grid;
+  gap: 12px;
+  max-height: 650px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.feedbackCard {
+  background: #fbfcfa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.feedbackMeals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedbackMeals span {
+  background: var(--mint);
+  border-radius: 999px;
+  color: var(--green-dark);
+  font-size: 0.86rem;
+  padding: 6px 10px;
+}
+
+.feedbackQuote {
+  background: var(--soft);
+  border-left: 4px solid var(--amber);
+  color: var(--ink);
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
+.complaintQuote {
+  border-left-color: var(--coral);
+}
+
 @media (max-width: 940px) {
   .topbar,
   .sectionHeader,
@@ -829,6 +897,7 @@ textarea {
   .adminForm,
   .adminRow,
   .adminMenuCard,
+  .adminSplit,
   .menuTools,
   .adminCreateGrid,
   .adminEditGrid,

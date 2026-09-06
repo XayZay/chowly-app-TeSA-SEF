@@ -105,7 +105,7 @@ export async function POST(request) {
       const orderResult = await client.query(
         `
         insert into "order" (waiter_id, chef_id, bartender_id, status, wait_time_minutes)
-        values ($1, $2, $3, 'in_progress', $4)
+        values ($1, $2, $3, 'placed', $4)
         returning id
         `,
         [

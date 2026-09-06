@@ -68,6 +68,14 @@ export async function PATCH(request, { params }) {
     values.push(id);
 
     const order = await withTransaction(async (client) => {
+      if ("status" in body && body.status !== "placed") {
+        const orderLock = await client.query('select is_paid from "order" where id = $1 for update', [id]);
+        if (orderLock.rowCount === 0) return null;
+        if (!orderLock.rows[0].is_paid) {
+          return { paymentRequired: true };
+        }
+      }
+
       const result = await client.query(
         `update "order" set ${fields.join(", ")} where id = $${values.length} returning id`,
         values
@@ -82,6 +90,10 @@ export async function PATCH(request, { params }) {
 
     if (!order) {
       return json({ error: "Order not found." }, 404);
+    }
+
+    if (order.paymentRequired) {
+      return json({ error: "Payment is required before moving the order forward." }, 409);
     }
 
     return json(order);
