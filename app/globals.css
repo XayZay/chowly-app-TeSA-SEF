@@ -1,17 +1,21 @@
 :root {
-  color-scheme: light;
-  --ink: #17211d;
-  --muted: #61706a;
-  --line: #d9e1dc;
-  --panel: #ffffff;
-  --soft: #fff8d6;
-  --mint: #d8f0df;
-  --green: #0c6b4f;
-  --green-dark: #084b39;
-  --coral: #d7573f;
+  color-scheme: dark;
+  --ink: #e8ede9;
+  --muted: #8a9690;
+  --line: #2a3530;
+  --panel: #1a2420;
+  --soft: #222c27;
+  --mint: #1a3328;
+  --green: #22c77a;
+  --green-dark: #1aaf6a;
+  --coral: #e8674f;
   --amber: #f3b545;
   --cream: #fffbd1;
-  --sky: #e7ecf7;
+  --sky: #1e2838;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -21,12 +25,15 @@
 body {
   margin: 0;
   background:
-    linear-gradient(rgba(12, 107, 79, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 107, 79, 0.045) 1px, transparent 1px),
-    #fff9d8;
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    #121a16;
   background-size: 36px 36px;
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -38,6 +45,7 @@ textarea {
 
 button {
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 button:disabled {
@@ -52,14 +60,14 @@ main {
 .topbar {
   align-items: center;
   background:
-    linear-gradient(rgba(12, 107, 79, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 107, 79, 0.07) 1px, transparent 1px),
-    linear-gradient(135deg, #fffbd1 0%, #fff6c4 54%, #d9f4c7 100%);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(135deg, #141e18 0%, #18271e 54%, #1a2e22 100%);
   background-size: 42px 42px, 42px 42px, auto;
-  border-bottom: 2px solid #18211d;
+  border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
-  min-height: 164px;
+  min-height: 140px;
   padding: 24px clamp(20px, 6vw, 72px);
 }
 
@@ -98,10 +106,54 @@ h4 {
   text-transform: uppercase;
 }
 
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adminLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(26, 36, 32, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
+}
+
+.adminLink svg {
+  transition: transform 0.3s ease;
+}
+
+.adminLink:hover {
+  color: var(--green);
+  border-color: rgba(34, 199, 122, 0.4);
+  background: rgba(34, 199, 122, 0.08);
+  box-shadow: 0 0 14px rgba(34, 199, 122, 0.25);
+  transform: translateY(-1px);
+}
+
+.adminLink:hover svg {
+  transform: rotate(45deg);
+}
+
+.adminLink:active {
+  transform: scale(0.95);
+}
+
 .modeSwitch {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #18211d;
-  border-radius: 8px;
+  background: rgba(26, 36, 32, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(2, 1fr);
@@ -122,13 +174,29 @@ h4 {
   min-height: 40px;
   padding: 0 16px;
   text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modeSwitch button:hover,
+.statusButtons button:hover:not(:disabled) {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modeSwitch button:active,
+.statusButtons button:active:not(:disabled),
+.categoryPills button:active {
+  transform: scale(0.95);
 }
 
 .modeSwitch button.active,
 .statusButtons button.active,
 .ratingRow button.active {
-  background: var(--green);
-  color: white;
+  background: linear-gradient(135deg, #22c77a 0%, #1aaf6a 100%);
+  color: #0c1813;
+  font-weight: 800;
+  box-shadow: 0 2px 12px rgba(34, 199, 122, 0.35);
 }
 
 .heroCopy {
@@ -139,11 +207,11 @@ h4 {
 }
 
 .heroCopy h1 {
-  background: #17211d;
-  border: 2px solid #17211d;
-  border-radius: 8px;
-  box-shadow: 8px 8px 0 #22ad5c;
-  color: #fffbd1;
+  background: #0e1a14;
+  border: 2px solid #22c77a;
+  border-radius: var(--radius);
+  box-shadow: 5px 5px 0 #22c77a, 0 0 30px rgba(34, 199, 122, 0.2);
+  color: #e8ede9;
   display: inline-block;
   padding: 8px 18px 12px;
   width: fit-content;
@@ -167,15 +235,14 @@ h4 {
 .customerLayout,
 .waiterLayout {
   margin: 0 auto;
-  max-width: 1240px;
-  padding: 28px clamp(16px, 4vw, 40px);
+  padding: 28px clamp(24px, 4vw, 56px);
 }
 
 .notice {
-  background: #fff6d7;
-  border: 1px solid #f1d88f;
+  background: #2a2518;
+  border: 1px solid #3d3420;
   border-radius: 8px;
-  color: #5d4510;
+  color: #f3c868;
   margin-top: 20px;
   padding: 14px 16px;
   white-space: pre-wrap;
@@ -183,8 +250,8 @@ h4 {
 
 .customerLayout {
   display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) 360px;
 }
 
 .menuPane,
@@ -193,8 +260,8 @@ h4 {
 .waiterLayout,
 .orderCard {
   background: var(--panel);
-  border: 1px solid #18211d;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
 .menuPane,
@@ -206,9 +273,10 @@ h4 {
 
 .sidePanel {
   align-self: start;
-  box-shadow: 0 22px 50px rgba(24, 35, 54, 0.12);
+  box-shadow: var(--shadow-md);
   position: sticky;
   top: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .sectionHeader,
@@ -221,22 +289,34 @@ h4 {
 
 .ghostButton,
 .primaryButton {
-  border: 1px solid #18211d;
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   min-height: 42px;
   padding: 0 16px;
 }
 
 .ghostButton {
-  background: white;
+  background: var(--panel);
   color: var(--green);
 }
 
+.ghostButton:hover {
+  background: #223028;
+}
+
 .primaryButton {
-  background: var(--green);
-  border-color: var(--green);
-  color: white;
+  background: linear-gradient(135deg, #22c77a 0%, #1aaf6a 100%);
+  border-color: #22c77a;
+  color: #0c1813;
+  font-weight: 700;
   width: 100%;
+  box-shadow: 0 2px 10px rgba(34, 199, 122, 0.2);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #28d785 0%, #1eb872 100%);
+  border-color: #28d785;
+  box-shadow: 0 4px 14px rgba(34, 199, 122, 0.35);
 }
 
 .ghostButton.full {
@@ -252,7 +332,48 @@ h4 {
 }
 
 .menuGroup h3 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menuGroup:nth-of-type(1) h3 {
+  color: #ff9d5c; /* Warm coral accent for Kitchen */
+}
+
+.menuGroup:nth-of-type(1) h3::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ff9d5c;
+  box-shadow: 0 0 8px rgba(255, 157, 92, 0.6);
+}
+
+.menuGroup:nth-of-type(2) h3 {
+  color: #38bdf8; /* Cool cyan accent for Bar */
+}
+
+.subCategorySection {
+  margin-top: 18px;
+  margin-bottom: 24px;
+}
+
+.subCategoryTitle {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--ink);
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
 }
 
 .ordersGrid {
@@ -269,18 +390,24 @@ h4 {
 
 .menuItem {
   align-items: stretch;
-  border: 1px solid #18211d;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(140px, 0.7fr) minmax(0, 1fr);
-  min-height: 240px;
+  min-height: 220px;
   padding: 16px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .foodCard {
-  background: #fff;
-  box-shadow: 10px 10px 0 rgba(12, 107, 79, 0.12);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+
+.foodCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .cardImageButton {
@@ -323,6 +450,9 @@ h4 {
 .foodMeta,
 .detailStats,
 .tagRow,
+.foodMeta,
+.detailStats,
+.tagRow,
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -332,11 +462,31 @@ h4 {
 .foodMeta span,
 .detailStats span,
 .tagRow span {
-  background: var(--soft);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   color: var(--muted);
-  font-size: 0.86rem;
-  padding: 6px 10px;
+  font-size: 0.82rem;
+  padding: 4px 10px;
+}
+
+/* Accent meta tags */
+.foodMeta span:nth-child(1) {
+  background: rgba(243, 181, 69, 0.12);
+  border-color: rgba(243, 181, 69, 0.25);
+  color: #f3b545;
+}
+
+.foodMeta span:nth-child(2) {
+  background: rgba(34, 199, 122, 0.12);
+  border-color: rgba(34, 199, 122, 0.25);
+  color: #22c77a;
+}
+
+.foodMeta span:nth-child(3) {
+  background: rgba(232, 103, 79, 0.12);
+  border-color: rgba(232, 103, 79, 0.25);
+  color: #ff8a75;
 }
 
 .foodCardActions {
@@ -347,6 +497,12 @@ h4 {
   margin-top: auto;
 }
 
+.foodCardActions strong {
+  color: #f3b545;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
 .menuTools {
   display: grid;
   gap: 12px;
@@ -354,23 +510,48 @@ h4 {
   margin-top: 22px;
 }
 
-.categoryPills {
-  display: flex;
-  gap: 8px;
-}
-
 .categoryPills button {
-  background: #fff;
-  border: 1px solid #18211d;
+  background: var(--panel);
+  border: 1px solid var(--line);
   border-radius: 999px;
   min-height: 42px;
   padding: 0 18px;
+  color: var(--muted);
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.categoryPills button:hover:not(.active) {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .categoryPills button.active {
-  background: #22ad5c;
-  color: #07110d;
+  background: linear-gradient(135deg, #22c77a 0%, #1aaf6a 100%);
+  color: #0c1813;
   font-weight: 800;
+  border-color: #22c77a;
+  box-shadow: 0 4px 14px rgba(34, 199, 122, 0.35);
+  transform: translateY(-1px);
+}
+
+.cardImageButton {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.cardImageButton img {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cardImageButton:hover img {
+  transform: scale(1.06);
+}
+
+.cardImageButton:active img {
+  transform: scale(0.98);
 }
 
 .menuItem p,
@@ -383,21 +564,31 @@ h4 {
 
 .stepper {
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border: 1px solid rgba(243, 181, 69, 0.3);
+  border-radius: 8px;
   display: grid;
-  grid-template-columns: 36px 34px 36px;
+  grid-template-columns: 34px 32px 34px;
   overflow: hidden;
+  background: rgba(243, 181, 69, 0.05);
 }
 
 .stepper button {
-  background: var(--soft);
+  background: rgba(243, 181, 69, 0.15);
+  color: #f3b545;
   border: 0;
-  height: 36px;
+  height: 34px;
+  font-weight: 700;
+}
+
+.stepper button:hover {
+  background: rgba(243, 181, 69, 0.3);
 }
 
 .stepper span {
   text-align: center;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .lineItems {
@@ -449,7 +640,7 @@ h4 {
 
 .progress span.done {
   background: var(--mint);
-  color: var(--green-dark);
+  color: var(--green);
   font-weight: 700;
 }
 
@@ -462,12 +653,22 @@ h4 {
 textarea,
 input,
 select {
+  background: #162019;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--ink);
   min-height: 42px;
   padding: 10px 12px;
   width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(34, 199, 122, 0.15);
+  outline: none;
 }
 
 textarea {
@@ -540,30 +741,33 @@ textarea {
 
 .detailShell {
   margin: 0 auto;
-  max-width: 1180px;
+  max-width: 1080px;
   padding: 28px clamp(16px, 4vw, 40px);
 }
 
 .phoneDetail {
-  background: #f9faf9;
-  border: 10px solid #1c1f24;
-  border-radius: 42px;
-  box-shadow: 0 28px 80px rgba(24, 35, 54, 0.24);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   margin: 0 auto;
-  max-width: 430px;
-  min-height: 760px;
+  max-width: 1040px;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(340px, 440px) 1fr;
 }
 
 .detailHero {
-  height: 330px;
+  height: 100%;
+  min-height: 420px;
   position: relative;
 }
 
 .roundButton {
   align-items: center;
-  background: rgba(23, 33, 29, 0.68);
-  border: 0;
+  background: rgba(14, 26, 20, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   color: #fff;
   display: flex;
@@ -571,8 +775,9 @@ textarea {
   height: 42px;
   justify-content: center;
   position: absolute;
-  top: 24px;
+  top: 20px;
   width: 42px;
+  z-index: 2;
 }
 
 .roundButton.left {
@@ -582,14 +787,19 @@ textarea {
 
 .roundButton.right {
   right: 20px;
+  width: auto;
+  padding: 0 14px;
+  font-size: 0.9rem;
 }
 
 .detailSheet {
-  background: #fff;
-  border-radius: 28px 28px 0 0;
-  margin-top: -28px;
-  padding: 24px 20px 26px;
+  background: var(--panel);
+  border-radius: 0;
+  margin-top: 0;
+  padding: 32px 36px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .detailTitle {
@@ -663,11 +873,11 @@ textarea {
 
 .adminHero {
   background:
-    linear-gradient(rgba(12, 107, 79, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 107, 79, 0.07) 1px, transparent 1px),
-    linear-gradient(135deg, #fffbd1 0%, #cfeeb5 100%);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(135deg, #121a16 0%, #182218 100%);
   background-size: 40px 40px, 40px 40px, auto;
-  border-bottom: 2px solid #18211d;
+  border-bottom: 1px solid var(--line);
   padding: 24px clamp(20px, 6vw, 72px) 52px;
 }
 
@@ -692,8 +902,8 @@ textarea {
 .navPills a,
 .navPills span,
 .navPills button {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid #18211d;
+  background: rgba(26, 36, 32, 0.75);
+  border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--ink);
   cursor: pointer;
@@ -722,27 +932,39 @@ textarea {
 }
 
 .adminCreatePanel,
-.adminMenuCard {
-  background: #fff;
-  border: 1px solid #18211d;
-  border-radius: 8px;
-  padding: 18px;
+.adminMenuCard,
+.loginPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.loginPanel {
+  display: grid;
+  gap: 14px;
+  width: 100%;
 }
 
 .adminCreatePanel {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .adminCreateGrid,
 .adminEditGrid {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .adminEditGrid {
-  grid-template-columns: minmax(180px, 1fr) 110px 120px 110px 110px 90px;
+  grid-template-columns: minmax(180px, 1.2fr) 110px 110px 110px 100px 90px;
+}
+
+.adminEditGrid.duo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .adminEditGrid.triple {
@@ -753,25 +975,34 @@ textarea {
   align-items: end;
   display: flex;
   justify-content: space-between;
+  margin-top: 32px;
+  margin-bottom: 16px;
 }
 
 .adminMenuList {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .adminMenuCard {
   display: grid;
-  gap: 12px;
+  gap: 18px;
   grid-template-columns: 240px minmax(0, 1fr);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.adminMenuCard:hover {
+  border-color: rgba(34, 199, 122, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .adminPreview {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   height: 100%;
-  min-height: 240px;
+  min-height: 220px;
   overflow: hidden;
+  position: relative;
 }
 
 .adminPreview img {
@@ -779,17 +1010,100 @@ textarea {
   height: 100%;
   object-fit: cover;
   width: 100%;
+  transition: transform 0.3s ease;
 }
 
-.adminMenuCard textarea,
-.adminMenuCard > input,
-.adminMenuCard > .adminEditGrid,
-.adminMenuCard > button {
-  grid-column: 2;
+.adminMenuCard:hover .adminPreview img {
+  transform: scale(1.04);
 }
 
-.adminForm .primaryButton {
-  height: 42px;
+.statusBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+}
+
+.statusBadge.active {
+  background: rgba(34, 199, 122, 0.25);
+  color: #22c77a;
+  border: 1px solid rgba(34, 199, 122, 0.4);
+}
+
+.statusBadge.hidden {
+  background: rgba(232, 103, 79, 0.25);
+  color: #ff8a75;
+  border: 1px solid rgba(232, 103, 79, 0.4);
+}
+
+.subcategoryBadge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(18, 26, 22, 0.85);
+  color: #f3b545;
+  border: 1px solid rgba(243, 181, 69, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.adminTools {
+  margin-bottom: 24px;
+}
+
+.adminCardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.showButton,
+.hideButton {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.showButton {
+  background: linear-gradient(135deg, #22c77a 0%, #1aaf6a 100%);
+  color: #0c1813;
+  border: 1px solid #22c77a;
+  box-shadow: 0 2px 10px rgba(34, 199, 122, 0.25);
+}
+
+.showButton:hover {
+  background: linear-gradient(135deg, #28d785 0%, #1eb872 100%);
+  box-shadow: 0 4px 14px rgba(34, 199, 122, 0.4);
+}
+
+.hideButton {
+  background: rgba(232, 103, 79, 0.12);
+  border: 1px solid rgba(232, 103, 79, 0.3);
+  color: #ff8a75;
+}
+
+.hideButton:hover {
+  background: rgba(232, 103, 79, 0.25);
+  border-color: rgba(232, 103, 79, 0.5);
+}
+
+.amberPrice {
+  color: #f3b545;
+  font-size: 1.1rem;
 }
 
 .adminTable {
@@ -820,8 +1134,8 @@ textarea {
 }
 
 .statusButtons button:disabled {
-  background: #eef0ed;
-  color: #89948f;
+  background: #1e2924;
+  color: #4a5752;
 }
 
 .adminSplit {
@@ -832,9 +1146,9 @@ textarea {
 }
 
 .feedbackPanel {
-  background: #fff;
-  border: 1px solid #18211d;
-  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   display: grid;
   gap: 16px;
   padding: 18px;
@@ -849,7 +1163,7 @@ textarea {
 }
 
 .feedbackCard {
-  background: #fbfcfa;
+  background: var(--soft);
   border: 1px solid var(--line);
   border-radius: 8px;
   display: grid;
@@ -866,7 +1180,7 @@ textarea {
 .feedbackMeals span {
   background: var(--mint);
   border-radius: 999px;
-  color: var(--green-dark);
+  color: var(--green);
   font-size: 0.86rem;
   padding: 6px 10px;
 }
@@ -901,8 +1215,13 @@ textarea {
   .menuTools,
   .adminCreateGrid,
   .adminEditGrid,
-  .adminEditGrid.triple {
+  .adminEditGrid.triple,
+  .phoneDetail {
     grid-template-columns: 1fr;
+  }
+
+  .detailHero {
+    min-height: 280px;
   }
 
   .adminPreview,
@@ -944,4 +1263,23 @@ textarea {
   .detailShell {
     padding: 0;
   }
+}
+
+/* On-click View & Mode Transition Animations */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.customerLayout,
+.waiterLayout,
+.detailShell,
+.menuGroup {
+  animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,6 +75,21 @@ export default function AdminPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [adminCategoryFilter, setAdminCategoryFilter] = useState("all");
+  const [adminSearch, setAdminSearch] = useState("");
+
+  const filteredAdminItems = useMemo(() => {
+    const term = adminSearch.trim().toLowerCase();
+    return items.filter((item) => {
+      const matchesCategory = adminCategoryFilter === "all" || item.category === adminCategoryFilter;
+      const matchesSearch =
+        !term ||
+        item.name.toLowerCase().includes(term) ||
+        String(item.description || "").toLowerCase().includes(term) ||
+        String(item.ingredients || "").toLowerCase().includes(term);
+      return matchesCategory && matchesSearch;
+    });
+  }, [adminCategoryFilter, items, adminSearch]);
 
   const loadAdminData = useCallback(async function loadAdminData() {
     setLoading(true);
@@ -201,10 +216,7 @@ export default function AdminPage() {
       {!authenticated ? (
         <section className="adminPage">
           <form className="loginPanel" onSubmit={login}>
-            <div>
-              <p className="eyebrow">Protected area</p>
-              <h2>{checkingSession ? "Checking session" : "Admin login"}</h2>
-            </div>
+            <h2>{checkingSession ? "Checking session..." : "Admin login"}</h2>
             <input
               autoComplete="username"
               disabled={checkingSession}
@@ -220,37 +232,75 @@ export default function AdminPage() {
               type="password"
               value={loginForm.password}
             />
-            <button className="primaryButton" disabled={checkingSession}>Login</button>
+            <button className="primaryButton" disabled={checkingSession}>
+              {checkingSession ? "Connecting..." : "Login"}
+            </button>
           </form>
         </section>
       ) : (
         <section className="adminPage">
         <div className="adminSplit">
           <form className="adminCreatePanel" onSubmit={createItem}>
-          <div>
-            <p className="eyebrow">New item</p>
-            <h2>Add to menu</h2>
-          </div>
-          <div className="adminCreateGrid">
-            <input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Item name" />
-            <input value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} placeholder="Price" type="number" min="1" step="50" />
-            <input value={form.prepTimeMinutes} onChange={(event) => setForm((current) => ({ ...current, prepTimeMinutes: event.target.value }))} placeholder="Prep minutes" type="number" min="1" step="1" />
-            <select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}>
-              <option value="food">Food</option>
-              <option value="drink">Drink</option>
-            </select>
-            <input value={form.calories} onChange={(event) => setForm((current) => ({ ...current, calories: event.target.value }))} placeholder="Calories" type="number" min="0" step="10" />
-            <input value={form.rating} onChange={(event) => setForm((current) => ({ ...current, rating: event.target.value }))} placeholder="Rating" type="number" min="0" max="5" step="0.1" />
-          </div>
-          <input value={form.imageUrl} onChange={(event) => setForm((current) => ({ ...current, imageUrl: event.target.value }))} placeholder="Image URL" />
-          <input value={form.sourceUrl} onChange={(event) => setForm((current) => ({ ...current, sourceUrl: event.target.value }))} placeholder="Source URL" />
-          <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description" />
-          <div className="adminCreateGrid">
-            <input value={form.ingredients} onChange={(event) => setForm((current) => ({ ...current, ingredients: event.target.value }))} placeholder="Ingredients, comma-separated" />
-            <input value={form.allergens} onChange={(event) => setForm((current) => ({ ...current, allergens: event.target.value }))} placeholder="Allergens, comma-separated" />
-            <input value={form.pairings} onChange={(event) => setForm((current) => ({ ...current, pairings: event.target.value }))} placeholder="Pairings, comma-separated" />
-          </div>
-          <button className="primaryButton">Add item</button>
+            <div>
+              <p className="eyebrow">New item</p>
+              <h2>Add to menu</h2>
+            </div>
+            <div className="adminCreateGrid">
+              <label className="fieldGroup">
+                <span>Name</span>
+                <input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Item name" />
+              </label>
+              <label className="fieldGroup">
+                <span>Price (₦)</span>
+                <input value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} placeholder="Price" type="number" min="1" step="50" />
+              </label>
+              <label className="fieldGroup">
+                <span>Prep (min)</span>
+                <input value={form.prepTimeMinutes} onChange={(event) => setForm((current) => ({ ...current, prepTimeMinutes: event.target.value }))} placeholder="Prep minutes" type="number" min="1" step="1" />
+              </label>
+              <label className="fieldGroup">
+                <span>Category</span>
+                <select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}>
+                  <option value="food">Food</option>
+                  <option value="drink">Drink</option>
+                </select>
+              </label>
+              <label className="fieldGroup">
+                <span>Calories</span>
+                <input value={form.calories} onChange={(event) => setForm((current) => ({ ...current, calories: event.target.value }))} placeholder="Calories" type="number" min="0" step="10" />
+              </label>
+              <label className="fieldGroup">
+                <span>Rating</span>
+                <input value={form.rating} onChange={(event) => setForm((current) => ({ ...current, rating: event.target.value }))} placeholder="Rating" type="number" min="0" max="5" step="0.1" />
+              </label>
+            </div>
+            <label className="fieldGroup">
+              <span>Image URL</span>
+              <input value={form.imageUrl} onChange={(event) => setForm((current) => ({ ...current, imageUrl: event.target.value }))} placeholder="Image URL" />
+            </label>
+            <label className="fieldGroup">
+              <span>Source URL</span>
+              <input value={form.sourceUrl} onChange={(event) => setForm((current) => ({ ...current, sourceUrl: event.target.value }))} placeholder="Source URL" />
+            </label>
+            <label className="fieldGroup">
+              <span>Description</span>
+              <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Description" />
+            </label>
+            <div className="adminCreateGrid">
+              <label className="fieldGroup">
+                <span>Ingredients</span>
+                <input value={form.ingredients} onChange={(event) => setForm((current) => ({ ...current, ingredients: event.target.value }))} placeholder="Comma-separated" />
+              </label>
+              <label className="fieldGroup">
+                <span>Allergens</span>
+                <input value={form.allergens} onChange={(event) => setForm((current) => ({ ...current, allergens: event.target.value }))} placeholder="Comma-separated" />
+              </label>
+              <label className="fieldGroup">
+                <span>Pairings</span>
+                <input value={form.pairings} onChange={(event) => setForm((current) => ({ ...current, pairings: event.target.value }))} placeholder="Comma-separated" />
+              </label>
+            </div>
+            <button className="primaryButton">+ Create Menu Item</button>
           </form>
 
           <section className="feedbackPanel">
@@ -270,9 +320,9 @@ export default function AdminPage() {
                   <div className="orderTop">
                     <div>
                       <p className="eyebrow">Order {shortId(order.id)}</p>
-                      <h3>{order.rating ? `${order.rating.score}/5 rating` : "Complaint submitted"}</h3>
+                      <h3>{order.rating ? `⭐ ${order.rating.score}/5 rating` : "Complaint submitted"}</h3>
                     </div>
-                    <strong>{money(order.total)}</strong>
+                    <strong className="amberPrice">{money(order.total)}</strong>
                   </div>
                   <p className="finePrint">{formatDate(order.rating?.submittedAt || order.complaints?.[0]?.submittedAt || order.placed_at)}</p>
                   <div className="feedbackMeals">
@@ -293,39 +343,102 @@ export default function AdminPage() {
         <div className="adminListHeader">
           <div>
             <p className="eyebrow">Current items</p>
-            <h2>{loading ? "Loading menu" : `${items.length} records`}</h2>
+            <h2>{loading ? "Loading menu..." : `${filteredAdminItems.length} of ${items.length} records`}</h2>
           </div>
           <button className="ghostButton" onClick={loadAdminData}>Refresh</button>
         </div>
 
+        <div className="menuTools adminTools">
+          <input
+            value={adminSearch}
+            onChange={(event) => setAdminSearch(event.target.value)}
+            placeholder="Search records by name, ingredients, description..."
+          />
+          <div className="categoryPills">
+            <button className={adminCategoryFilter === "all" ? "active" : ""} onClick={() => setAdminCategoryFilter("all")}>All</button>
+            <button className={adminCategoryFilter === "food" ? "active" : ""} onClick={() => setAdminCategoryFilter("food")}>Foods</button>
+            <button className={adminCategoryFilter === "drink" ? "active" : ""} onClick={() => setAdminCategoryFilter("drink")}>Drinks</button>
+          </div>
+        </div>
+
+        {filteredAdminItems.length === 0 ? (
+          <p className="empty" style={{ marginTop: "24px" }}>No admin menu records match your search or filter.</p>
+        ) : null}
+
         <div className="adminMenuList">
-          {items.map((item) => (
+          {filteredAdminItems.map((item) => (
             <article className={!item.is_available ? "adminMenuCard mutedRow" : "adminMenuCard"} key={item.id}>
               <div className="adminPreview">
                 <img src={item.image_url} alt={item.name} />
+                <span className={item.is_available ? "statusBadge active" : "statusBadge hidden"}>
+                  {item.is_available ? "Active" : "Hidden"}
+                </span>
               </div>
-              <div className="adminEditGrid">
-                <input defaultValue={item.name} onBlur={(event) => event.target.value !== item.name && updateItem(item, { name: event.target.value })} />
-                <input defaultValue={Number(item.price)} min="1" onBlur={(event) => Number(event.target.value) !== Number(item.price) && updateItem(item, { price: event.target.value })} step="50" type="number" />
-                <input defaultValue={item.prep_time_minutes} min="1" onBlur={(event) => Number(event.target.value) !== Number(item.prep_time_minutes) && updateItem(item, { prepTimeMinutes: Number(event.target.value) })} step="1" type="number" />
-                <select defaultValue={item.category} onChange={(event) => updateItem(item, { category: event.target.value })}>
-                  <option value="food">Food</option>
-                  <option value="drink">Drink</option>
-                </select>
-                <input defaultValue={item.calories || ""} min="0" onBlur={(event) => Number(event.target.value || 0) !== Number(item.calories || 0) && updateItem(item, { calories: Number(event.target.value || 0) })} placeholder="Calories" type="number" />
-                <input defaultValue={Number(item.rating || 4.6)} min="0" max="5" onBlur={(event) => Number(event.target.value) !== Number(item.rating || 0) && updateItem(item, { rating: Number(event.target.value) })} step="0.1" type="number" />
+              <div className="adminCardDetails">
+                <div className="adminEditGrid">
+                  <label className="fieldGroup">
+                    <span>Name</span>
+                    <input defaultValue={item.name} onBlur={(event) => event.target.value !== item.name && updateItem(item, { name: event.target.value })} />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Price (₦)</span>
+                    <input defaultValue={Number(item.price)} min="1" onBlur={(event) => Number(event.target.value) !== Number(item.price) && updateItem(item, { price: event.target.value })} step="50" type="number" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Prep (min)</span>
+                    <input defaultValue={item.prep_time_minutes} min="1" onBlur={(event) => Number(event.target.value) !== Number(item.prep_time_minutes) && updateItem(item, { prepTimeMinutes: Number(event.target.value) })} step="1" type="number" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Category</span>
+                    <select defaultValue={item.category} onChange={(event) => updateItem(item, { category: event.target.value })}>
+                      <option value="food">Food</option>
+                      <option value="drink">Drink</option>
+                    </select>
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Calories</span>
+                    <input defaultValue={item.calories || ""} min="0" onBlur={(event) => Number(event.target.value || 0) !== Number(item.calories || 0) && updateItem(item, { calories: Number(event.target.value || 0) })} placeholder="Calories" type="number" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Rating</span>
+                    <input defaultValue={Number(item.rating || 4.6)} min="0" max="5" onBlur={(event) => Number(event.target.value) !== Number(item.rating || 0) && updateItem(item, { rating: Number(event.target.value) })} step="0.1" type="number" />
+                  </label>
+                </div>
+                <label className="fieldGroup">
+                  <span>Description</span>
+                  <textarea defaultValue={item.description || ""} onBlur={(event) => event.target.value !== (item.description || "") && updateItem(item, { description: event.target.value })} />
+                </label>
+                <div className="adminEditGrid duo">
+                  <label className="fieldGroup">
+                    <span>Image URL</span>
+                    <input defaultValue={item.image_url || ""} onBlur={(event) => event.target.value !== (item.image_url || "") && updateItem(item, { imageUrl: event.target.value })} placeholder="Image URL" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Source URL</span>
+                    <input defaultValue={item.source_url || ""} onBlur={(event) => event.target.value !== (item.source_url || "") && updateItem(item, { sourceUrl: event.target.value })} placeholder="Source URL" />
+                  </label>
+                </div>
+                <div className="adminEditGrid triple">
+                  <label className="fieldGroup">
+                    <span>Ingredients</span>
+                    <input defaultValue={listToCsv(item.ingredients)} onBlur={(event) => event.target.value !== listToCsv(item.ingredients) && updateItem(item, { ingredients: csvToList(event.target.value) })} placeholder="Ingredients" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Allergens</span>
+                    <input defaultValue={listToCsv(item.allergens)} onBlur={(event) => event.target.value !== listToCsv(item.allergens) && updateItem(item, { allergens: csvToList(event.target.value) })} placeholder="Allergens" />
+                  </label>
+                  <label className="fieldGroup">
+                    <span>Pairings</span>
+                    <input defaultValue={listToCsv(item.pairings)} onBlur={(event) => event.target.value !== listToCsv(item.pairings) && updateItem(item, { pairings: csvToList(event.target.value) })} placeholder="Pairings" />
+                  </label>
+                </div>
+                <button
+                  className={item.is_available ? "hideButton" : "showButton"}
+                  onClick={() => updateItem(item, { isAvailable: !item.is_available })}
+                >
+                  {item.is_available ? "Hide from menu" : "Show on menu"}
+                </button>
               </div>
-              <textarea defaultValue={item.description || ""} onBlur={(event) => event.target.value !== (item.description || "") && updateItem(item, { description: event.target.value })} />
-              <input defaultValue={item.image_url || ""} onBlur={(event) => event.target.value !== (item.image_url || "") && updateItem(item, { imageUrl: event.target.value })} placeholder="Image URL" />
-              <input defaultValue={item.source_url || ""} onBlur={(event) => event.target.value !== (item.source_url || "") && updateItem(item, { sourceUrl: event.target.value })} placeholder="Source URL" />
-              <div className="adminEditGrid triple">
-                <input defaultValue={listToCsv(item.ingredients)} onBlur={(event) => event.target.value !== listToCsv(item.ingredients) && updateItem(item, { ingredients: csvToList(event.target.value) })} placeholder="Ingredients" />
-                <input defaultValue={listToCsv(item.allergens)} onBlur={(event) => event.target.value !== listToCsv(item.allergens) && updateItem(item, { allergens: csvToList(event.target.value) })} placeholder="Allergens" />
-                <input defaultValue={listToCsv(item.pairings)} onBlur={(event) => event.target.value !== listToCsv(item.pairings) && updateItem(item, { pairings: csvToList(event.target.value) })} placeholder="Pairings" />
-              </div>
-              <button className="ghostButton" onClick={() => updateItem(item, { isAvailable: !item.is_available })}>
-                {item.is_available ? "Hide from menu" : "Show on menu"}
-              </button>
             </article>
           ))}
         </div>
