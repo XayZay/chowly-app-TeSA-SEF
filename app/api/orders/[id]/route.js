@@ -68,7 +68,7 @@ export async function PATCH(request, { params }) {
     values.push(id);
 
     const order = await withTransaction(async (client) => {
-      if ("status" in body && body.status !== "placed") {
+      if ("status" in body && (body.status === "ready" || body.status === "served")) {
         const orderLock = await client.query('select is_paid from "order" where id = $1 for update', [id]);
         if (orderLock.rowCount === 0) return null;
         if (!orderLock.rows[0].is_paid) {

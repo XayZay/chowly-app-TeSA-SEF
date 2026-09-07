@@ -74,11 +74,20 @@ export default function Home() {
   const loadBaseData = useCallback(async function loadBaseData() {
     setLoading(true);
     
+    const SESSION_TIMEOUT = 60 * 60 * 1000; // 1 hour
     let sessionId = localStorage.getItem("chowly:sessionId");
+    let lastSeen = localStorage.getItem("chowly:sessionLastSeen");
+    
+    if (sessionId && lastSeen && (Date.now() - parseInt(lastSeen, 10) > SESSION_TIMEOUT)) {
+      sessionId = null;
+      localStorage.removeItem("chowly:lastOrderId"); // Clear any old active order
+    }
+
     if (!sessionId) {
       sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
       localStorage.setItem("chowly:sessionId", sessionId);
     }
+    localStorage.setItem("chowly:sessionLastSeen", Date.now().toString());
 
     try {
       const [menuResult, staffResult, orderResult] = await Promise.allSettled([
@@ -447,10 +456,10 @@ export default function Home() {
                   {statusSteps.map((status) => (
                     <button
                       className={order.status === status ? "active" : ""}
-                      disabled={!order.is_paid && status !== "placed"}
+                      disabled={!order.is_paid && (status === "ready" || status === "served")}
                       key={status}
                       onClick={() => updateOrder(order.id, { status })}
-                      title={!order.is_paid && status !== "placed" ? "Payment is required before moving this order forward." : ""}
+                      title={!order.is_paid && (status === "ready" || status === "served") ? "Payment is required before moving this order to ready/served." : ""}
                     >
                       {statusLabels[status]}
                     </button>
