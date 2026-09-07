@@ -456,10 +456,10 @@ export default function Home() {
                   {statusSteps.map((status) => (
                     <button
                       className={order.status === status ? "active" : ""}
-                      disabled={!order.is_paid && (status === "ready" || status === "served")}
+                      disabled={!order.is_paid && status !== "placed"}
                       key={status}
                       onClick={() => updateOrder(order.id, { status })}
-                      title={!order.is_paid && (status === "ready" || status === "served") ? "Payment is required before moving this order to ready/served." : ""}
+                      title={!order.is_paid && status !== "placed" ? "Payment is required before moving this order forward." : ""}
                     >
                       {statusLabels[status]}
                     </button>
